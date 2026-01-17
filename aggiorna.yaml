@@ -2,7 +2,7 @@
 - hosts: all
   become: true
   gather_facts: no
-
+  any_errors_fatal: false
   tasks:
     - name: "Check connettività"
       wait_for_connection:
