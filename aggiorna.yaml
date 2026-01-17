@@ -2,6 +2,7 @@
 - hosts: all
   become: true
   gather_facts: no
+
   tasks:
     - name: "Check connettività (ignora IP vuoti)"
       wait_for_connection:
@@ -18,16 +19,16 @@
         autoclean: yes
         purge: yes
       ignore_unreachable: yes
-   # CONTROLLO RIAVVIO (Opzionale ma consigliato)
-    - name: Controlla se è richiesto un riavvio (Debian/Ubuntu)
-      register: reboot_required_file
+
+    - name: "Controlla se è richiesto un riavvio"
+      when: ssh_check is success
       stat:
         path: /var/run/reboot-required
-      when: ansible_os_family == "Debian"
-    - name: Avviso se il riavvio è necessario
-      debug:
-        msg: "ATTENZIONE: Il server richiede un riavvio per applicare gli aggiornamenti del kernel."
+      register: reboot_required_file
+
+    - name: "Avviso se il riavvio è necessario"
       when: 
-        - ansible_os_family == "Debian"
+        - ssh_check is success
         - reboot_required_file.stat.exists
-        
+      debug:
+        msg: "ATTENZIONE: Il server richiede un riavvio per applicare gli aggiornamenti."
