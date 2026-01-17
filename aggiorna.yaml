@@ -1,29 +1,29 @@
 ---
-- name: Aggiornamento completo del sistema Linux
-  hosts: all
-  become: yes  # Necessario per eseguire i comandi come root (sudo)
-  gather_facts: yes
-  ignore_unreachable: true
+- hosts: all
+  become: true
+  gather_facts: no  # Velocizza tutto ed evita errori su IP vuoti
   tasks:
-    # SEZIONE PER DEBIAN/UBUNTU
-    - name: Aggiorna i server basati su Debian/Ubuntu (APT)
-      when: ansible_os_family == "Debian"
-      block:
-        - name: Aggiorna la cache dei pacchetti ed esegui l'upgrade
-          apt:
-            update_cache: yes
-            upgrade: dist
-            autoremove: yes
-            autoclean: yes
-            purge: yes
-
+    - name: "Check connettività (ignora IP vuoti)"
+      wait_for_connection:
+        timeout: 2
+      ignore_unreachable: yes
+      register: ssh_check
+    - name: "Aggiorna APT (solo se raggiungibile)"
+      when: ssh_check is success
+      apt:
+        update_cache: yes
+        upgrade: dist
+        autoremove: yes
+        autoclean: yes
+        purge: yes
+      # Questo evita che il task fallisca graficamente se l'IP è vuoto
+      ignore_unreachable: yes
     # CONTROLLO RIAVVIO (Opzionale ma consigliato)
     - name: Controlla se è richiesto un riavvio (Debian/Ubuntu)
       register: reboot_required_file
       stat:
         path: /var/run/reboot-required
       when: ansible_os_family == "Debian"
-
     - name: Avviso se il riavvio è necessario
       debug:
         msg: "ATTENZIONE: Il server richiede un riavvio per applicare gli aggiornamenti del kernel."
