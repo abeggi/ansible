@@ -4,13 +4,13 @@
   gather_facts: no
 
   tasks:
-    - name: "Check connettività (ignora IP vuoti)"
+    - name: "Check connettività"
       wait_for_connection:
         timeout: 2
       ignore_unreachable: yes
       register: ssh_check
 
-    - name: "Aggiorna APT (solo se raggiungibile)"
+    - name: "Aggiorna APT"
       when: ssh_check is success
       apt:
         update_cache: yes
@@ -20,15 +20,15 @@
         purge: yes
       ignore_unreachable: yes
 
-    - name: "Controlla se è richiesto un riavvio"
+    - name: "Verifica Reboot"
       when: ssh_check is success
       stat:
         path: /var/run/reboot-required
       register: reboot_required_file
 
-    - name: "Avviso se il riavvio è necessario"
-      when: 
+    - name: "Messaggio Reboot"
+      when:
         - ssh_check is success
         - reboot_required_file.stat.exists
       debug:
-        msg: "ATTENZIONE: Il server richiede un riavvio per applicare gli aggiornamenti."
+        msg: "Il server richiede un riavvio."
