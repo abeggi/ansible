@@ -2,6 +2,7 @@
 - name: Aggiornamento completo del sistema Linux
   hosts: all
   become: yes  # Necessario per eseguire i comandi come root (sudo)
+  gather_facts: yes
   ignore_unreachable: true
   tasks:
     # SEZIONE PER DEBIAN/UBUNTU
