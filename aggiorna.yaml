@@ -1,13 +1,14 @@
 ---
 - hosts: all
   become: true
-  gather_facts: no  # Velocizza tutto ed evita errori su IP vuoti
+  gather_facts: no
   tasks:
     - name: "Check connettività (ignora IP vuoti)"
       wait_for_connection:
         timeout: 2
       ignore_unreachable: yes
       register: ssh_check
+
     - name: "Aggiorna APT (solo se raggiungibile)"
       when: ssh_check is success
       apt:
@@ -16,9 +17,8 @@
         autoremove: yes
         autoclean: yes
         purge: yes
-      # Questo evita che il task fallisca graficamente se l'IP è vuoto
       ignore_unreachable: yes
-    # CONTROLLO RIAVVIO (Opzionale ma consigliato)
+   # CONTROLLO RIAVVIO (Opzionale ma consigliato)
     - name: Controlla se è richiesto un riavvio (Debian/Ubuntu)
       register: reboot_required_file
       stat:
