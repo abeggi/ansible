@@ -1,33 +1,25 @@
----
 - name: Aggiornamento completo del sistema Linux
   hosts: all
   ignore_unreachable: true
-  become: yes  # Necessario per eseguire i comandi come root (sudo)
-  gather_facts: yes
+  become: yes
+  gather_facts: false   # ← non necessario, li conosci già
+  vars:
+    ansible_ssh_timeout: 5
   tasks:
-    # SEZIONE PER DEBIAN/UBUNTU
-    - name: Aggiorna i server basati su Debian/Ubuntu (APT)
-      when: ansible_os_family == "Debian"
-      block:
-        - name: Aggiorna la cache dei pacchetti ed esegui l'upgrade
-          apt:
-            update_cache: yes
-            upgrade: dist
-            autoremove: yes
-            autoclean: yes
-            purge: yes
+    - name: Aggiorna la cache dei pacchetti ed esegui l'upgrade
+      apt:
+        update_cache: yes
+        upgrade: dist
+        autoremove: yes
+        autoclean: yes
+        purge: yes
 
-    # CONTROLLO RIAVVIO (Opzionale ma consigliato)
-    - name: Controlla se è richiesto un riavvio (Debian/Ubuntu)
+    - name: Controlla se è richiesto un riavvio
       register: reboot_required_file
       stat:
         path: /var/run/reboot-required
-      when: ansible_os_family == "Debian"
 
     - name: Avviso se il riavvio è necessario
       debug:
         msg: "ATTENZIONE: Il server richiede un riavvio per applicare gli aggiornamenti del kernel."
-      when: 
-        - ansible_os_family == "Debian"
-        - reboot_required_file.stat.exists
-        
+      when: reboot_required_file.stat.exists | default(false)
