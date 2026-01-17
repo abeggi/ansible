@@ -23,16 +23,4 @@
       debug:
         msg: "ATTENZIONE: Il server richiede un riavvio per applicare gli aggiornamenti del kernel."
       when: reboot_required_file.stat.exists | default(false)
-      
-    - name: "Notifica Telegram"
-      delegate_to: localhost
-      run_once: true
-      vars:
-        token: "7746304837:AAEFXj47CX3OgodAwip7AZA1F6glV5AtOhA"
-        chat_id: "8012944611"
-      shell: |
-        curl -s -X POST "https://api.telegram.org/bot{{ token }}/sendMessage" \
-             -d chat_id="{{ chat_id }}" \
-             -d parse_mode="HTML" \
-             -d text="<b>✅ Semaphore Update</b>%0A📦 Aggiornamento completato sui container.%0A🕒 Ora: {{ ansible_date_time.time }}"  
-      
+
