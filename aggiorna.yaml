@@ -5,8 +5,6 @@
   gather_facts: false   # ← non necessario, li conosci già
   vars:
     ansible_ssh_timeout: 5
-    telegram_token: "7746304837:AAFhVPwtQFQv-xF3aLUxFEdgM66Es-HFXgk"
-    telegram_chat_id: "8012944611"
   tasks:
     - name: Aggiorna la cache dei pacchetti ed esegui l'upgrade
       apt:
@@ -16,25 +14,4 @@
         autoclean: yes
         purge: yes
 
-    - name: Controlla se è richiesto un riavvio
-      register: reboot_required_file
-      stat:
-        path: /var/run/reboot-required
-        
-    - name: Invia notifica Telegram
-      delegate_to: localhost
-      run_once: false # Se vuoi una notifica per ogni server aggiornato
-      community.general.telegram:
-        token: "{{ telegram_token }}"
-        api_chat_id: "{{ telegram_chat_id }}"
-        msg: |
-          ✅ *Aggiornamento Completato*
-          🖥 *Server*: {{ inventory_hostname }}
-          ⚠️ *Riavvio richiesto*: {{ 'SI' if reboot_required_file.stat.exists else 'No' }}
-        format: markdown    
-
-   # - name: Avviso se il riavvio è necessario
-   #   debug:
-   #     msg: "ATTENZIONE: Il server richiede un riavvio per applicare gli aggiornamenti del kernel."
-   #   when: reboot_required_file.stat.exists | default(false)
 
