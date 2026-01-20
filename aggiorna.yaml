@@ -7,6 +7,7 @@
     ansible_ssh_timeout: 5
   tasks:
     - name: Aggiorna la cache dei pacchetti ed esegui l'upgrade
+      no_log: true  # ← Nasconde i dettagli dell'esecuzione nei log
       apt:
         update_cache: yes
         upgrade: dist
