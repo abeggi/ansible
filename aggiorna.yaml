@@ -1,6 +1,7 @@
 - name: Aggiornamento completo del sistema Linux
   hosts: all
   ignore_unreachable: true
+  ignore_errors: "{{ ansible_check_mode }}"
   become: yes
   gather_facts: false   # ← non necessario, li conosci già
   vars:
